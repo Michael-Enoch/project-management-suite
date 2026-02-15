@@ -32,7 +32,7 @@ management:
 app:
   security:
     jwt:
-      secret: ${PPM_JWT_SECRET:replace-this-with-a-minimum-32-char-jwt-secret}
+      secret: ${PPM_JWT_SECRET:216d7273da054153237a869376000879}
       access-token-ttl: ${PPM_ACCESS_TOKEN_TTL:PT15M}
       refresh-token-ttl: ${PPM_REFRESH_TOKEN_TTL:P30D}
       issuer: ${PPM_JWT_ISSUER:ppm-backend}
