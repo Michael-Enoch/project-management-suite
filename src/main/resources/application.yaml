@@ -20,6 +20,7 @@ spring:
       fail-on-unknown-properties: true
 
 server:
+  port: ${PORT:8080}
   error:
     include-message: never
 

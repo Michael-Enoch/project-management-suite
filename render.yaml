@@ -1,0 +1,43 @@
+services:
+  - type: web
+    name: ppm-backend
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: PPM_DB_URL
+        fromDatabase:
+          name: ppm-postgres
+          property: connectionString
+      - key: PPM_DB_USERNAME
+        fromDatabase:
+          name: ppm-postgres
+          property: user
+      - key: PPM_DB_PASSWORD
+        fromDatabase:
+          name: ppm-postgres
+          property: password
+      - key: PPM_JWT_SECRET
+        sync: false
+      - key: PPM_JWT_ISSUER
+        value: ppm-backend
+      - key: PPM_ACCESS_TOKEN_TTL
+        value: PT15M
+      - key: PPM_REFRESH_TOKEN_TTL
+        value: P30D
+      - key: PPM_ALLOWED_ORIGINS
+        sync: false
+      - key: PPM_BOOTSTRAP_ADMIN_ENABLED
+        value: "false"
+      - key: PPM_BOOTSTRAP_ADMIN_EMAIL
+        sync: false
+      - key: PPM_BOOTSTRAP_ADMIN_PASSWORD
+        sync: false
+
+databases:
+  - name: ppm-postgres
+    databaseName: ppm
+    user: ppm
+    plan: free

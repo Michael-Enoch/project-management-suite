@@ -27,7 +27,7 @@ Hexagonal/Clean layering:
 
 - `PPM_DB_URL` (default `jdbc:postgresql://localhost:5432/ppm`)
 - `PPM_DB_USERNAME` (default `postgres`)
-- `PPM_DB_PASSWORD` (default `postgres`)
+- `PPM_DB_PASSWORD` (default `michael`)
 - `PPM_JWT_SECRET` (must be at least 32 chars)
 - `PPM_ACCESS_TOKEN_TTL` (default `PT15M`)
 - `PPM_REFRESH_TOKEN_TTL` (default `P30D`)
@@ -35,9 +35,40 @@ Hexagonal/Clean layering:
 - `PPM_BOOTSTRAP_ADMIN_ENABLED` (`true|false`)
 - `PPM_BOOTSTRAP_ADMIN_EMAIL`
 - `PPM_BOOTSTRAP_ADMIN_PASSWORD`
+- `PORT` (default `8080`; Render sets this automatically)
 
 ## Run
 
 ```bash
 ./mvnw spring-boot:run
 ```
+
+## Docker
+
+```bash
+docker build -t ppm-backend .
+docker run --rm -p 8080:8080 \
+  -e PPM_DB_URL=jdbc:postgresql://host.docker.internal:5432/ppm \
+  -e PPM_DB_USERNAME=postgres \
+  -e PPM_DB_PASSWORD=postgres \
+  -e PPM_JWT_SECRET=replace-with-32-char-secret \
+  ppm-backend
+```
+
+## Deploy To Render
+
+This repository now includes:
+
+- `Dockerfile` for containerized builds
+- `.dockerignore` to keep Docker context small
+- `render.yaml` Blueprint with:
+  - one `web` service using `runtime: docker`
+  - one managed PostgreSQL database (`ppm-postgres`)
+  - environment variables wired from the database and secrets
+
+Steps:
+
+1. Push this repo to GitHub/GitLab/Bitbucket.
+2. In Render, create from Blueprint (`render.yaml`) or create a Web Service from this repo.
+3. Set secret values for `PPM_JWT_SECRET`, `PPM_ALLOWED_ORIGINS`, and optional bootstrap admin vars.
+4. Deploy and verify `GET /actuator/health` returns `200`.
