@@ -16,7 +16,9 @@ Hexagonal/Clean layering:
 ## Key Features
 
 - Projects, tasks, milestones, KPI/report endpoints
-- Stateless authentication (`/api/v1/auth/login`, `/api/v1/auth/refresh`)
+- Stateless authentication (`/api/v1/auth/login`, `/api/v1/auth/refresh`, `/api/v1/auth/me`)
+- Server-backed task list endpoint (`GET /api/v1/tasks`) with pagination + filters/search
+- Project list filters (`GET /api/v1/projects?status=...&q=...`)
 - Permission-based RBAC + object-level project membership checks (IDOR protection)
 - Flyway schema + RBAC seed migrations
 - RFC7807-style error responses via centralized `@RestControllerAdvice`
@@ -35,6 +37,7 @@ Hexagonal/Clean layering:
 - `PPM_BOOTSTRAP_ADMIN_ENABLED` (`true|false`)
 - `PPM_BOOTSTRAP_ADMIN_EMAIL`
 - `PPM_BOOTSTRAP_ADMIN_PASSWORD`
+- `SPRING_PROFILES_ACTIVE` (`prod` in cloud deploys to enforce production fail-fast checks)
 - `PORT` (default `8080`; Render sets this automatically)
 
 ## Run
@@ -70,5 +73,5 @@ Steps:
 
 1. Push this repo to GitHub/GitLab/Bitbucket.
 2. In Render, create from Blueprint (`render.yaml`) or create a Web Service from this repo.
-3. Set secret values for `PPM_JWT_SECRET`, `PPM_ALLOWED_ORIGINS`, and optional bootstrap admin vars.
+3. Set secret values for `PPM_JWT_SECRET`, `PPM_ALLOWED_ORIGINS`, `PPM_BOOTSTRAP_ADMIN_EMAIL`, and `PPM_BOOTSTRAP_ADMIN_PASSWORD`.
 4. Deploy and verify `GET /actuator/health` returns `200`.

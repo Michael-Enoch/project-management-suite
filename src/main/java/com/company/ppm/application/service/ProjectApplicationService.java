@@ -85,10 +85,11 @@ public class ProjectApplicationService implements ProjectUseCase {
 
     @Override
     @Transactional(readOnly = true)
-    public PageResponse<ProjectSummaryResponse> list(UUID actorUserId, int page, int size) {
+    public PageResponse<ProjectSummaryResponse> list(UUID actorUserId, int page, int size, ProjectStatus status, String query) {
         boolean admin = authorizationService.isAdmin(actorUserId);
+        String sanitizedQuery = query == null || query.isBlank() ? null : query.trim();
         PageRequest pageRequest = PageRequest.of(Math.max(page, 0), Math.min(Math.max(size, 1), 100), Sort.by("createdAt").descending());
-        Page<Project> result = projectPort.findAccessibleProjects(actorUserId, admin, pageRequest);
+        Page<Project> result = projectPort.findAccessibleProjects(actorUserId, admin, status, sanitizedQuery, pageRequest);
         return PageResponse.from(result, this::toSummaryResponse);
     }
 

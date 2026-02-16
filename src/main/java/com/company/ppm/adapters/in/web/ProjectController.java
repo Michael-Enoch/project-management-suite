@@ -5,6 +5,7 @@ import com.company.ppm.application.dto.common.PageResponse;
 import com.company.ppm.application.dto.project.CreateProjectRequest;
 import com.company.ppm.application.dto.project.ProjectResponse;
 import com.company.ppm.application.dto.project.ProjectSummaryResponse;
+import com.company.ppm.domain.model.ProjectStatus;
 import com.company.ppm.domain.port.in.ProjectUseCase;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -48,9 +49,11 @@ public class ProjectController {
     public PageResponse<ProjectSummaryResponse> list(
             Authentication authentication,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) ProjectStatus status,
+            @RequestParam(name = "q", required = false) String query
     ) {
         CurrentUser user = CurrentUser.from(authentication);
-        return projectUseCase.list(user.userId(), page, size);
+        return projectUseCase.list(user.userId(), page, size, status, query);
     }
 }

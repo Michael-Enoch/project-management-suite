@@ -1,7 +1,9 @@
 package com.company.ppm.application.service;
 
+import com.company.ppm.application.dto.auth.AuthMeResponse;
 import com.company.ppm.application.dto.auth.LoginRequest;
 import com.company.ppm.application.dto.auth.TokenResponse;
+import com.company.ppm.domain.exception.AuthenticationFailedException;
 import com.company.ppm.domain.model.PermissionName;
 import com.company.ppm.domain.model.RoleName;
 import com.company.ppm.domain.model.UserAccount;
@@ -23,6 +25,7 @@ import java.util.Set;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -72,5 +75,54 @@ class AuthApplicationServiceTest {
 
         verify(userAccountPort).findByEmail("user@example.com");
         assertThat(response.accessToken()).isEqualTo("access-token");
+    }
+
+    @Test
+    void meReturnsNormalizedProfilePayload() {
+        UUID userId = UUID.randomUUID();
+        UserAccount user = new UserAccount(
+                userId,
+                "user@example.com",
+                "hashed",
+                true,
+                Set.of(RoleName.PROJECT_MANAGER, RoleName.TEAM_MEMBER),
+                Set.of(PermissionName.TASK_READ, PermissionName.PROJECT_WRITE),
+                Instant.now()
+        );
+
+        when(userAccountPort.findById(userId)).thenReturn(Optional.of(user));
+
+        AuthMeResponse response = authApplicationService.me(userId);
+
+        assertThat(response.id()).isEqualTo(userId);
+        assertThat(response.email()).isEqualTo("user@example.com");
+        assertThat(response.active()).isTrue();
+        assertThat(response.roles()).containsExactly("PROJECT_MANAGER", "TEAM_MEMBER");
+        assertThat(response.permissions()).containsExactly("PROJECT_WRITE", "TASK_READ");
+    }
+
+    @Test
+    void meRejectsMissingOrInactiveUser() {
+        UUID missingUserId = UUID.randomUUID();
+        UUID inactiveUserId = UUID.randomUUID();
+        UserAccount inactive = new UserAccount(
+                inactiveUserId,
+                "inactive@example.com",
+                "hash",
+                false,
+                Set.of(RoleName.VIEWER),
+                Set.of(PermissionName.PROJECT_READ),
+                Instant.now()
+        );
+
+        when(userAccountPort.findById(missingUserId)).thenReturn(Optional.empty());
+        when(userAccountPort.findById(inactiveUserId)).thenReturn(Optional.of(inactive));
+
+        assertThatThrownBy(() -> authApplicationService.me(missingUserId))
+                .isInstanceOf(AuthenticationFailedException.class)
+                .hasMessage("Invalid user");
+        assertThatThrownBy(() -> authApplicationService.me(inactiveUserId))
+                .isInstanceOf(AuthenticationFailedException.class)
+                .hasMessage("Invalid user");
     }
 }

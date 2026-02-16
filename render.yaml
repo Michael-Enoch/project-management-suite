@@ -21,6 +21,8 @@ services:
           property: password
       - key: PPM_JWT_SECRET
         sync: false
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
       - key: PPM_JWT_ISSUER
         value: ppm-backend
       - key: PPM_ACCESS_TOKEN_TTL
@@ -30,7 +32,7 @@ services:
       - key: PPM_ALLOWED_ORIGINS
         sync: false
       - key: PPM_BOOTSTRAP_ADMIN_ENABLED
-        value: "false"
+        value: "true"
       - key: PPM_BOOTSTRAP_ADMIN_EMAIL
         sync: false
       - key: PPM_BOOTSTRAP_ADMIN_PASSWORD
