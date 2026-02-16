@@ -21,8 +21,21 @@ public interface ProjectJpaRepository extends JpaRepository<ProjectEntity, UUID>
                 select 1 from ProjectMemberEntity pm
                 where pm.id.projectId = p.id and pm.id.userId = :userId
             ))
+            and (:status is null or p.status = :status)
+            and (
+                :query is null
+                or lower(p.code) like lower(concat('%', :query, '%'))
+                or lower(p.name) like lower(concat('%', :query, '%'))
+                or lower(coalesce(p.description, '')) like lower(concat('%', :query, '%'))
+            )
             """)
-    Page<ProjectEntity> findAccessibleProjects(@Param("userId") UUID userId, @Param("admin") boolean admin, Pageable pageable);
+    Page<ProjectEntity> findAccessibleProjects(
+            @Param("userId") UUID userId,
+            @Param("admin") boolean admin,
+            @Param("status") ProjectStatus status,
+            @Param("query") String query,
+            Pageable pageable
+    );
 
     @Query("""
             select count(p) from ProjectEntity p
