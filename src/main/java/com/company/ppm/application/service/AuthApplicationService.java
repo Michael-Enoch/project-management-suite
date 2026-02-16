@@ -1,5 +1,6 @@
 package com.company.ppm.application.service;
 
+import com.company.ppm.application.dto.auth.AuthMeResponse;
 import com.company.ppm.application.dto.auth.LoginRequest;
 import com.company.ppm.application.dto.auth.RefreshRequest;
 import com.company.ppm.application.dto.auth.TokenResponse;
@@ -21,6 +22,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.Instant;
 import java.util.HexFormat;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
@@ -107,6 +109,29 @@ public class AuthApplicationService implements AuthUseCase {
         ));
 
         return toResponse(newPair);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public AuthMeResponse me(UUID actorUserId) {
+        UserAccount user = userAccountPort.findById(actorUserId)
+                .filter(UserAccount::active)
+                .orElseThrow(() -> new AuthenticationFailedException("Invalid user"));
+
+        List<String> roles = user.roles() == null
+                ? List.of()
+                : user.roles().stream().map(Enum::name).sorted().toList();
+        List<String> permissions = user.permissions() == null
+                ? List.of()
+                : user.permissions().stream().map(Enum::name).sorted().toList();
+
+        return new AuthMeResponse(
+                user.id(),
+                user.email(),
+                user.active(),
+                roles,
+                permissions
+        );
     }
 
     private void saveRefreshToken(UUID userId, String rawToken, Instant expiresAt) {
