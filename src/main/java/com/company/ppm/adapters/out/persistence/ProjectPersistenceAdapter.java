@@ -65,8 +65,8 @@ public class ProjectPersistenceAdapter implements ProjectPort {
     }
 
     @Override
-    public Page<Project> findAccessibleProjects(UUID userId, boolean admin, Pageable pageable) {
-        return projectJpaRepository.findAccessibleProjects(userId, admin, pageable).map(this::toDomain);
+    public Page<Project> findAccessibleProjects(UUID userId, boolean admin, ProjectStatus status, String query, Pageable pageable) {
+        return projectJpaRepository.findAccessibleProjects(userId, admin, status, query, pageable).map(this::toDomain);
     }
 
     @Override

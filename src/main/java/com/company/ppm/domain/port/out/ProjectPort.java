@@ -16,7 +16,7 @@ public interface ProjectPort {
 
     Optional<Project> findByCode(String code);
 
-    Page<Project> findAccessibleProjects(UUID userId, boolean admin, Pageable pageable);
+    Page<Project> findAccessibleProjects(UUID userId, boolean admin, ProjectStatus status, String query, Pageable pageable);
 
     boolean existsMembership(UUID projectId, UUID userId);
 

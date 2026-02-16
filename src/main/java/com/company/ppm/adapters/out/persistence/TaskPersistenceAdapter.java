@@ -5,6 +5,8 @@ import com.company.ppm.adapters.out.persistence.repository.TaskJpaRepository;
 import com.company.ppm.domain.model.Task;
 import com.company.ppm.domain.model.TaskStatus;
 import com.company.ppm.domain.port.out.TaskPort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,6 +50,11 @@ public class TaskPersistenceAdapter implements TaskPort {
     @Override
     public Optional<Task> findById(UUID taskId) {
         return taskJpaRepository.findById(taskId).map(this::toDomain);
+    }
+
+    @Override
+    public Page<Task> findAccessibleTasks(UUID userId, boolean admin, UUID projectId, TaskStatus status, String query, Pageable pageable) {
+        return taskJpaRepository.findAccessibleTasks(userId, admin, projectId, status, query, pageable).map(this::toDomain);
     }
 
     @Override

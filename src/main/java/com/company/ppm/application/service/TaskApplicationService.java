@@ -1,10 +1,11 @@
 package com.company.ppm.application.service;
 
-import com.company.ppm.domain.exception.DomainException;
+import com.company.ppm.application.dto.common.PageResponse;
 import com.company.ppm.application.dto.task.CreateTaskRequest;
 import com.company.ppm.application.dto.task.TaskResponse;
 import com.company.ppm.application.dto.task.UpdateTaskRequest;
 import com.company.ppm.domain.exception.ConflictException;
+import com.company.ppm.domain.exception.DomainException;
 import com.company.ppm.domain.exception.ResourceNotFoundException;
 import com.company.ppm.domain.model.AuditEvent;
 import com.company.ppm.domain.model.Task;
@@ -14,6 +15,9 @@ import com.company.ppm.domain.port.out.AuditPort;
 import com.company.ppm.domain.port.out.ProjectPort;
 import com.company.ppm.domain.port.out.TaskPort;
 import com.company.ppm.domain.port.out.UserAccountPort;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -120,6 +124,21 @@ public class TaskApplicationService implements TaskUseCase {
         ));
 
         return toResponse(saved);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PageResponse<TaskResponse> list(UUID actorUserId, int page, int size, UUID projectId, TaskStatus status, String query) {
+        boolean admin = authorizationService.isAdmin(actorUserId);
+        String sanitizedQuery = query == null || query.isBlank() ? null : query.trim();
+        PageRequest pageRequest = PageRequest.of(
+                Math.max(page, 0),
+                Math.min(Math.max(size, 1), 100),
+                Sort.by("createdAt").descending()
+        );
+
+        Page<Task> result = taskPort.findAccessibleTasks(actorUserId, admin, projectId, status, sanitizedQuery, pageRequest);
+        return PageResponse.from(result, this::toResponse);
     }
 
     private TaskResponse toResponse(Task task) {

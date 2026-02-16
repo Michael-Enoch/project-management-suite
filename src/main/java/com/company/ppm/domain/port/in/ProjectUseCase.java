@@ -4,6 +4,7 @@ import com.company.ppm.application.dto.common.PageResponse;
 import com.company.ppm.application.dto.project.CreateProjectRequest;
 import com.company.ppm.application.dto.project.ProjectResponse;
 import com.company.ppm.application.dto.project.ProjectSummaryResponse;
+import com.company.ppm.domain.model.ProjectStatus;
 
 import java.util.UUID;
 
@@ -12,5 +13,5 @@ public interface ProjectUseCase {
 
     ProjectResponse getById(UUID actorUserId, UUID projectId);
 
-    PageResponse<ProjectSummaryResponse> list(UUID actorUserId, int page, int size);
+    PageResponse<ProjectSummaryResponse> list(UUID actorUserId, int page, int size, ProjectStatus status, String query);
 }
